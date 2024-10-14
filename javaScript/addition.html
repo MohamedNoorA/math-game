@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+      /* General Styles for All Screen Sizes */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: black;
+  overflow-x: hidden;
+}
+
+/* Centered Links and Title */
+.links-a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 10px;
+}
+
+/* Title Styling */
+.links-a h1 {
+  color: white;
+  font-size: 2.5rem; /* Responsive font size */
+}
+
+/* Link Styling */
+a {
+  color: white;
+  text-decoration: none;
+  margin: 20px;
+  font-size: 1.2rem; /* Responsive font size */
+}
+
+/* Link Hover Effect */
+.links-a a:hover {
+  color: red;
+  transition: color 0.3s ease;
+  transform: scale(1.05) translateY(-2px) translateX(-2px) rotate(3deg) skewY(-10deg) skewX(10deg);
+}
+
+/* App Container Styling */
+#app {
+  text-align: center;
+  padding: 20px;
+  font-family: sans-serif;
+  color: rgb(8, 240, 209);
+  margin: 20px auto;
+  width: 90%; /* Responsive width */
+  max-width: 400px; /* Maximum width */
+  background-color: #555; /* Updated background color */
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Problem Display */
+#problem {
+  font-size: 3rem; /* Responsive font size */
+}
+
+/* Incorrect Answer Styling */
+.incorrect {
+  color: red;
+}
+
+/* Winner and Loser Display */
+#winner, #loser {
+  font-size: 3rem; /* Responsive font size */
+}
+
+/* Button Styling */
+button {
+  margin: 10px;
+  padding: 10px 20px;
+  background-color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem; /* Responsive font size */
+}
+
+/* Responsive Design Adjustments */
+@media (max-width: 600px) {
+  .links-a h1 {
+    font-size: 2rem; /* Adjusted for smaller screens */
+  }
+
+  a {
+    font-size: 1rem; /* Adjusted for smaller screens */
+  }
+
+  #app {
+    padding: 10px;
+  }
+
+  #problem, #winner, #loser {
+    font-size: 2.5rem; /* Adjusted for smaller screens */
+  }
+
+  button {
+    padding: 8px 15px; /* Adjusted button size */
+    font-size: 0.9rem; /* Adjusted for smaller screens */
+  }
+}
+
+
+    </style>
+  </head>
+  <body>
+    
+    <div class="links-a">
+      <h1>Math Quiz</h1>
+      <a href="index.html">HOME</a>
+    </div>
+
+    <div id="app"></div>
+
+    <script type="text/babel">
+
+        function App () {
+
+            const [state, setState] = React.useState({
+              num1: Math.ceil(Math.random() * 10),
+              num2: Math.ceil(Math.random() * 10),
+              response: "",
+              score: 0,
+              incorrect: false,
+              rounds: 0,  // Track number of rounds played
+            });
+
+            function inputKeyPress(event) {
+              if(event.key === 'Enter') {
+                const answer = parseInt(state.response);
+                const correctAnswer = state.num1 + state.num2;
+                
+                // Increment the number of rounds played
+                setState(prevState => ({
+                  ...prevState,
+                  rounds: prevState.rounds + 1
+                }));
+                
+                // Check if the answer is correct
+                if (correctAnswer === answer) {
+                  setState(prevState => ({
+                    ...prevState,
+                    num1: Math.ceil(Math.random() * 10),
+                    num2: Math.ceil(Math.random() * 10),
+                    score: prevState.score + 1,
+                    response: "",
+                    incorrect: false
+                  }));
+                } else {
+                  setState(prevState => ({
+                    ...prevState,
+                    response: "",
+                    incorrect: true
+                  }));
+                }
+              }
+            }
+
+            function updateResponse(event) {
+              setState({
+                ...state,
+                response: event.target.value
+              });
+            }
+
+            function resetGame() {
+              setState({
+                num1: Math.ceil(Math.random() * 10),
+                num2: Math.ceil(Math.random() * 10),
+                response: "",
+                score: 0,
+                incorrect: false,
+                rounds: 0
+              });
+            }
+
+            function tryAgain() {
+              setState({
+                num1: Math.ceil(Math.random() * 10),
+                num2: Math.ceil(Math.random() * 10),
+                response: "",
+                score: 0,
+                incorrect: false,
+                rounds: 0
+              });
+            }
+
+            function clearScore() {
+              setState({
+                ...state,
+                score: 0,
+                incorrect: false,
+                rounds: 0
+              });
+            }
+
+            // If the user answers 10 questions
+            if (state.rounds === 10) {
+              if (state.score === 10) {
+                return (
+                  <div id="winner">
+                    You won!
+                    <p>Final Score: {state.score}</p>
+                    <button onClick={resetGame}>Restart</button>
+                  </div>
+                );
+              } else {
+                return (
+                  <div id="loser">
+                    You lost!
+                    <p>Final Score: {state.score}</p>
+                    <button onClick={tryAgain}>Try Again</button>
+                  </div>
+                );
+              }
+            }
+
+            return (
+                <div>
+                    <div className={state.incorrect ? "incorrect" : ""} id="problem" >
+                      {state.num1} + {state.num2}
+                    </div>
+                    <input 
+                      autoFocus={true} 
+                      onKeyPress={inputKeyPress} 
+                      onChange={updateResponse} 
+                      value={state.response} 
+                    />
+                    <div>Score: {state.score}</div>
+                    <div>Rounds: {state.rounds}/10</div>
+                    <div>
+                      <button onClick={clearScore}>Clear Score</button>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.querySelector("#app"));
+    </script>
+
+  </body>
+</html>
